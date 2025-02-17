@@ -6,7 +6,12 @@ const jwt=require("jsonwebtoken");
 const multer=require("multer");
 const path=require("path");
 const cors=require("cors");
+const router = express.Router();
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
+const dotenv = require("dotenv");
 
+dotenv.config();
 app.use(express.json());//with the help of this express.json,whatever request we will get from response that will be automatically pass throough json
 app.use(cors());//using this our react js project will connect to express app on 4000port
 
@@ -130,8 +135,119 @@ app.get('/allproducts',async(req,res)=>{
     res.send(products);
 })
 
-//Schema creating for user model
-const Users=mongoose.model('Users',{
+const ngoSchema=new mongoose.Schema({
+    name:{
+        type: String,
+        required: true,
+    },
+    url:{
+        type:String,
+        required:true,
+    }
+
+});
+const Ngo=mongoose.model("Ngo",ngoSchema);
+
+app.post('/addngo', async (req, res) => {
+    try {
+        const { name, url } = req.body;
+
+        if (!name || !url) {
+            return res.status(400).json({ success: false, message: "Name and URL are required" });
+        }
+
+        const ngo = new Ngo({ name, url });
+        await ngo.save();
+
+        console.log("NGO Saved:", ngo);
+        res.json({ success: true, name: ngo.name });
+    } catch (error) {
+        console.error("Error saving NGO:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+app.get('/allngos', async (req, res) => {
+    try {
+        const ngos = await Ngo.find({});
+        console.log("All NGOs Fetched");
+        res.json({ success: true, ngos });
+    } catch (error) {
+        console.error("Error fetching NGOs:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+
+// Clothes schema
+const ClothesSchema = new mongoose.Schema({
+    type: {
+      type: String,
+      required: true,
+      enum: ['T-shirt', 'Shirt', 'Jeans', 'Trouser'],
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    damage: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+  });
+  
+  // Donation schema
+  const DonationSchema = new mongoose.Schema({
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    city: {
+      type: String,
+      required: true,
+    },
+    pincode: {
+      type: String,
+      required: true,
+    },
+    clothesDetails: {
+      type: [ClothesSchema],
+      required: true,
+    },
+    ngo: {
+      name: {
+        type: String,
+        required: true,
+      },
+    },
+    donationDate: {
+      type: Date,
+      required: true,
+    },
+  });
+  
+  const Donation = mongoose.model("Donation", DonationSchema);
+
+  const Users=mongoose.model('Users',{
     name:{
         type:String
     },
@@ -148,8 +264,97 @@ const Users=mongoose.model('Users',{
     date:{
         type:Date,
         default:Date.now,
-    }
+    },
+    coins: {
+        type: Number,
+        default: 0, // Start with 0 coins
+    },
+    donationCount: {
+        type: Number,
+        default: 0, // Tracks the number of donations
+    },
+
 })
+  
+  module.exports = Donation;
+
+  app.post('/donation', async (req, res) => {
+    try {
+      let user1 = await Users.findOne({ email: req.body.email });
+      if (!user1) {
+        return res.status(400).json({ success: false, error: "Please use the same email ID." });
+      }
+  
+      const donation = new Donation({
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        address: req.body.address,
+        city: req.body.city,
+        pincode: req.body.pincode,
+        clothesDetails: req.body.clothesDetails,
+        ngo: { name: req.body.ngo }, // Corrected: req.body.ngo is a string
+        donationDate: req.body.donationDate,
+      });
+      user1.coins += 100;
+      user1.donationCount += 1;
+  
+      let discountApplied = false;
+    //   if (user1.coins >= 500) {
+    //       // discountApplied = true;
+    //     //   user1.coins = 0;
+    //     //   user1.donationCount = 0;
+    //   }
+      await user1.save();
+      await donation.save();
+      return res.status(200).json({ success: true, message: "Donation received!" });
+
+      
+  
+      
+  
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ success: false, error: err.message });
+    }
+    
+   
+
+  });
+
+  app.get('/getuser', async (req, res) => {
+    const token = req.header('auth-token');
+    if (!token) {
+        return res.status(401).json({ success: false, errors: 'Authentication token is required' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, 'secret_ecom'); // Verify token
+        const user = await Users.findById(decoded.user.id); // Find user by ID
+
+        if (!user) {
+            return res.status(404).json({ success: false, errors: "User  not found" });
+        }
+
+        res.json({
+            success: true,
+            coins: user.coins,
+            donationCount: user.donationCount,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, errors: 'Internal server error' });
+    }
+});
+
+
+
+
+
+
+
+
+
 
 //creating endpoint for registring the user
 app.post('/signup',async(req,res)=>{
@@ -206,6 +411,10 @@ app.post('/login',async(req,res)=>{
     }
 })
 
+
+
+
+
 //creating endpoint for new collection data
 app.get('/newcollections',async(req,res)=>{
     let products=await Product.find({});
@@ -239,6 +448,9 @@ const fetchUser=async(req,res,next)=>{
     }
 }
 
+
+
+
 //creating endpoint for adding  products in cart data
 app.post('/addtocart',fetchUser,async(req,res)=>{
     //console.log(req.body,req.user);
@@ -267,6 +479,123 @@ app.post('/getcart', fetchUser, async (req, res) => {
         res.json(userData.cartData);
     } else {
         res.status(404).json({ error: "User not found" });
+    }
+});
+
+//for payment
+
+const PaymentSchema = new mongoose.Schema({
+    razorpay_order_id: {
+        type: String,
+        required: true,
+    },
+    razorpay_payment_id: {
+        type: String,
+        required: true,
+    },
+    razorpay_signature: {
+        type: String,
+        required: true,
+    },
+    email: {  // 🔹 Add email field
+        type: String,
+        required: true,
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    },
+});
+
+const Payment = mongoose.model("Payment", PaymentSchema);
+
+// ✅ Razorpay Instance
+const razorpayInstance = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_SECRET,
+});
+
+// ✅ Route to create a new order
+app.post('/api/payment/order', async (req, res) => {
+    try {
+        const { amount } = req.body;
+
+        if (!amount || isNaN(amount) || amount <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid amount" });
+        }
+
+        const options = {
+            amount: parseInt(amount * 100, 10), // Convert to paisa
+            currency: "INR",
+            receipt: crypto.randomBytes(10).toString("hex"),
+        };
+
+        const order = await razorpayInstance.orders.create(options);
+        res.status(200).json({ success: true, order });
+    } catch (error) {
+        console.error("Razorpay Order Error:", error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+});
+
+// ✅ Route to verify payment
+
+app.post('/api/payment/verify', async (req, res) => {
+    try {
+        const token = req.header('auth-token'); // Get token from request header
+        if (!token) {
+            return res.status(401).json({ success: false, message: "Authentication token is required" });
+        }
+
+        // Validate token and get user details using the '/getuser' endpoint logic
+        const decoded = jwt.verify(token, 'secret_ecom'); // Verify token
+        const user = await Users.findById(decoded.user.id); // Find user by ID
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found!" });
+        }
+
+        // Extract payment details from the request body
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+
+        // Validate payment details
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return res.status(400).json({ success: false, message: "Missing required payment data!" });
+        }
+
+        // Verify Razorpay signature
+        const generatedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_SECRET) // Replace with your actual secret key
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest('hex');
+
+        if (generatedSignature !== razorpay_signature) {
+            return res.status(400).json({ success: false, message: "Invalid signature!" });
+        }
+
+        // Save payment details with the user's email
+        const newPayment = new Payment({
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature,
+            email: user.email,
+        });
+
+        await newPayment.save();
+
+        // Deduct 500 coins if the user has enough coins
+        if (user.coins >= 500) {
+            user.coins -= 500;
+        } else {
+            return res.status(400).json({ success: false, message: "Not enough coins!" });
+        }
+
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Payment verified & 500 coins deducted!" });
+
+    } catch (error) {
+        console.error("Payment Verification Error:", error);
+        res.status(500).json({ success: false, message: "Payment verification failed!" });
     }
 });
 

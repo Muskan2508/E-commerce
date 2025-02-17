@@ -40,6 +40,7 @@
 
 import './App.css';
 import Navbar from './Components/Navbar/Navbar';
+import Donate from './Components/Donate/Donate';
 import Shop from './Pages/Shop';
 import Shopcategory from './Pages/Shopcategory';
 import Product from './Pages/Product';
@@ -51,12 +52,14 @@ import men_banner from './Components/Assets/banner_mens.png';
 import women_banner from './Components/Assets/banner_women.png';
 import kid_banner from './Components/Assets/banner_kids.png';
 import ShopcontextProvider from './Context/Shopcontext';
+ import Donation from './Pages/Donation';
 
 function App() {
   return (
     <ShopcontextProvider>
       <Router>
         <Navbar />
+        <Donate/>
         <Routes>
           <Route exact path="/" element={<Shop />} />
           <Route exact path="/men" element={<Shopcategory banner={men_banner} category="men" />} />
@@ -65,6 +68,7 @@ function App() {
           <Route exact path="/product/:productID" element={<Product />} />
           <Route exact path="/cart" element={<Cart />} />
           <Route exact path="/login" element={<LoginSignup />} />
+          <Route exact path="/donation" element={<Donation/>} />
         </Routes>
         <Footer />
       </Router>

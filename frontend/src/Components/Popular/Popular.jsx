@@ -10,7 +10,7 @@ const Popular = () => {
     .then((data)=>setPopularProducts(data));
   },[])
   return (
-    <div className='popular'>
+    <div className='popular slide-iin'>
         <h1>POPULAR IN WOMEN</h1>
         <hr/>
         <div className="popular-item">

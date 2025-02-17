@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useContext } from 'react';
+
 import './CSS/LoginSignup.css'
+//import { DonationContext } from '../Context/DonationContext'; 
 const LoginSignup = () => {
   const [state,setState]=useState("Login");
   const [formData,setFormData]=useState({
@@ -7,6 +9,7 @@ const LoginSignup = () => {
     password:"",
     email:""
   })
+  
   // to get the data from the input field we'll use changeHandler func
   const changeHandler=(e)=>{
     //e.target.name: This refers to the name attribute of the input field that triggered the change event (e.g., username, password, or email).
@@ -28,6 +31,7 @@ const LoginSignup = () => {
     }).then((response)=> response.json()).then((data)=>responseData=data)
     if(responseData.success){
       localStorage.setItem('auth-token',responseData.token);
+      
       window.location.replace("/");
     }else{
       alert(responseData.errors);
@@ -52,6 +56,8 @@ const LoginSignup = () => {
     }
   }
 
+
+
   return (
     <div className='loginsignup'>
       <div className="loginsignup-container">
@@ -71,7 +77,7 @@ const LoginSignup = () => {
         
         <div className="loginsignup-agree">
         <input type="checkbox"name='' id='' />
-        <p>By continuing,I agree to the Terms of Use & privacy policy</p>
+        <p className='log'>By continuing,I agree to the Terms of Use & privacy policy</p>
         </div>
       </div>
       

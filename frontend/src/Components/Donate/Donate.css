@@ -1,0 +1,180 @@
+.donate {
+    position: fixed;
+    bottom:1px;
+    display:flex;
+    justify-content:space-between;
+    width: 100%;
+    background-color: rgb(197, 137, 208);
+    padding: 10px 0px 10px 0px;
+    border: 1px solid #ccc;
+    z-index: 1000; 
+    opacity:0.8;
+    animation: slideInUp 0.9s ease-out forwards;
+}
+
+.donate-in{
+    position:relative;
+    margin-right:40px;
+    display:flex;
+    gap:30px;
+}
+
+.pn{
+    padding-top:8px;
+    margin-left:20px;
+    weight:300;
+    font-size:18px;
+}
+
+.para {
+    padding: 10px;
+    margin-right:1px;
+    font-size: 16px;
+    border: none;
+    background-color: #45015d;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.text{
+    background-color:transparent;
+    border:none;
+    position: absolute;
+    top: 0;
+    right: -30px;
+    font-size:15px;
+    font-weight:500;
+}
+
+.para:hover{
+background-color: #00060a;
+}
+
+.text:hover{
+    color:white;
+}
+
+.modal {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    right:0;
+    bottom:0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.5); 
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; 
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; 
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.hh{
+    color:#170122;
+    
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.donate-button {
+    background-color: #802ea5; 
+    color: white; 
+    padding: 10px 20px; 
+    text-align: center; 
+    text-decoration: none; 
+    display: inline-block; 
+    font-size: 16px; 
+    margin: 15px 2px 0px 2px; 
+    cursor: pointer; 
+    border-radius: 5px;
+    transition: background-color 0.3s;
+    border:none;
+}
+
+.donate-button:hover {
+    background-color: #170122;
+    
+}
+
+.open-modal-button {
+    background-color: #ffebcd; 
+    color: #333; 
+    padding: 10px 15px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    margin: 20px;
+    transition: background-color 0.3s;
+}
+
+.modal-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-content li {
+    display: flex;
+    align-items: center;
+    gap: 8px; 
+    padding: 8px 0; 
+    font-size: 16px;
+}
+
+
+.open-modal-button:hover {
+    background-color: #f0e68c;
+}
+
+
+@keyframes slideInUp {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 0.8;
+    }
+  }
+
+
+  @media(max-width:500px){
+    .donate{
+        height:50px;
+        gap:2px;
+    }
+    p{
+        font-size: 10px;
+    }
+    .para{
+        font-size: 13px;
+    }
+    .text{
+        font-size:12px;
+    }
+}
